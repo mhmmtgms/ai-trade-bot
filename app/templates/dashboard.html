@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Trade Bot Kontrol Paneli</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1a2d;
+      --panel2:#0c1628;
+      --border:rgba(255,255,255,.08);
+      --text:#e7eefc;
+      --muted:rgba(231,238,252,.65);
+      --accent:#22c55e;
+      --danger:#ef4444;
+      --cyan:#38bdf8;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 600px at 20% 10%, rgba(56,189,248,.18), transparent 60%),
+                  radial-gradient(900px 500px at 80% 20%, rgba(34,197,94,.14), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 0 16px 40px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800;
+      letter-spacing:.2px;
+      font-size: 22px;
+    }
+    .brand .dot{
+      width:12px;height:12px;border-radius:50%;
+      background: var(--cyan);
+      box-shadow: 0 0 18px rgba(56,189,248,.65);
+    }
+
+    .pill{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+    }
+
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr;}
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-header{
+      padding: 16px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+    }
+
+    .card-title{
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display:flex; align-items:center; gap:10px;
+    }
+
+    .badge{
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+    }
+
+    .content{ padding: 18px; }
+
+    .muted{ color: var(--muted); font-size: 12px; line-height:1.45; }
+
+    /* Toggle */
+    .toggle{
+      position:relative;
+      width: 56px;
+      height: 30px;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      cursor:pointer;
+      transition:.2s;
+      flex: 0 0 auto;
+    }
+    .toggle::after{
+      content:"";
+      position:absolute;
+      top:3px; left:3px;
+      width: 24px; height: 24px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.9);
+      transition: transform .2s ease, background .2s ease;
+      transform: translateX(0);
+    }
+    .toggle.on{
+      background: rgba(34,197,94,.22);
+      border-color: rgba(34,197,94,.35);
+    }
+    .toggle.on::after{
+      transform: translateX(26px);
+      background: var(--accent);
+    }
+
+    /* Form */
+    .form{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 650px){
+      .form{grid-template-columns:1fr;}
+    }
+
+    .field{
+      background: rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 12px 10px;
+    }
+
+    .label{
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display:flex; justify-content:space-between; gap:10px;
+    }
+    .hint{ font-size: 11px; color: rgba(231,238,252,.45); }
+
+    input{
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .field input{
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .field input:focus{
+      border-bottom-color: rgba(56,189,248,.55);
+    }
+
+    .row{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .chip{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      cursor:pointer;
+      user-select:none;
+      font-weight:700;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .chip input{ display:none; }
+    .chip.active{
+      border-color: rgba(56,189,248,.45);
+      background: rgba(56,189,248,.12);
+      box-shadow: 0 0 0 1px rgba(56,189,248,.15) inset;
+    }
+
+    .actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top: 14px;
+    }
+    .btn{
+      padding: 10px 14px;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      cursor:pointer;
+      font-weight: 800;
+      letter-spacing:.2px;
+    }
+    .btn.primary{
+      border-color: rgba(34,197,94,.35);
+      background: rgba(34,197,94,.18);
+    }
+    .btn.primary:hover{ background: rgba(34,197,94,.24); }
+    .btn:hover{ background: rgba(255,255,255,.06); }
+
+    .toast{
+      margin-top:10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    #timeChips .chip{ padding: 9px 12px; }
+    #timeChips{ visibility: hidden; }
+
+    /* Sağ panel status grid */
+    .status-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      margin-top: 14px;
+    }
+
+    .status-box{
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 16px;
+      border-radius: 14px;
+    }
+
+    .status-label{
+      font-size: 12px;
+      opacity: .7;
+      margin-bottom: 8px;
+    }
+
+    .status-value{
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .status-value.on{ color:#22c55e; }
+    .status-value.off{ color:#ef4444; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span> AI Trade Bot Kontrol Paneli</div>
+      <div class="pill">Local • Tek Kullanıcı • v1</div>
+    </div>
+
+    <div class="grid">
+      <!-- Sol: Ayarlar -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚙️ Bot Ayarları <span class="badge">Anlık Güncellenir</span></div>
+          <div class="badge" id="lastSaved">—</div>
+        </div>
+
+        <div class="content">
+          <div class="form">
+            <div class="field">
+              <div class="label">Günlük Maksimum İşlem <span class="hint">0 = dur</span></div>
+              <input id="gunluk_maks_islem" type="number" min="0" step="1" value="100">
+            </div>
+
+            <div class="field">
+              <div class="label">Maks Açık Pozisyon <span class="hint">aynı anda</span></div>
+              <input id="maksimum_acik_pozisyon" type="number" min="0" step="1" value="10">
+            </div>
+
+            <div class="field">
+              <div class="label">İşlem Başı Risk (USD) <span class="hint">testnet/mini</span></div>
+              <input id="islem_basi_risk_usd" type="number" min="0" step="0.01" value="2">
+            </div>
+
+            <div class="field">
+              <div class="label">Zaman Dilimleri (dk) <span class="hint">5/10/15/30</span></div>
+              <div class="row" id="timeChips" style="margin-top:6px;">
+                <div class="chip active" data-min="5">5 dk</div>
+                <div class="chip active" data-min="10">10 dk</div>
+                <div class="chip active" data-min="15">15 dk</div>
+                <div class="chip active" data-min="30">30 dk</div>
+              </div>
+              <div class="hint" style="margin-top:8px;">Seçili olan zaman dilimlerinde işlem arar.</div>
+            </div>
+
+            <div class="field">
+              <div class="label">Kar Al (%) <span class="hint">TP</span></div>
+              <input id="kar_al_yuzde" type="number" min="0" step="0.1" value="3">
+            </div>
+
+            <div class="field">
+              <div class="label">Zarar Durdur (%) <span class="hint">SL</span></div>
+              <input id="zarar_durdur_yuzde" type="number" min="0" step="0.1" value="1">
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:14px;">
+            <div class="chip" id="chipBTC"><input type="checkbox" id="btc"> ₿ BTC</div>
+            <div class="chip" id="chipETH"><input type="checkbox" id="eth"> Ξ ETH</div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="btnRefresh">Yenile</button>
+            <button class="btn primary" id="btnSave">Ayarları Kaydet</button>
+          </div>
+          <div class="toast" id="toast"></div>
+        </div>
+      </div>
+
+      <!-- Sağ: Durum -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📊 Canlı Bot Durumu</div>
+            <div class="muted">Anlık sistem özeti</div>
+          </div>
+
+          <div class="toggle" id="toggle"></div>
+        </div>
+
+        <div class="content">
+          <div class="status-grid">
+            <div class="status-box">
+              <div class="status-label">Bot Durumu</div>
+              <div id="live_bot_status" class="status-value off">Kapalı</div>
+            </div>
+
+            <div class="status-box">
+              <div class="status-label">Günlük Maks İşlem</div>
+              <div id="live_daily_limit" class="status-value">0</div>
+            </div>
+
+            <div class="status-box">
+              <div class="status-label">Maks Açık Pozisyon</div>
+              <div id="live_max_position" class="status-value">0</div>
+            </div>
+
+            <div class="status-box">
+              <div class="status-label">İşlem Başı Risk ($)</div>
+              <div id="live_risk" class="status-value">0</div>
+            </div>
+          </div>
+
+          <div class="muted" style="margin-top:14px;">
+            Bot açıkken ayarlar uygulanır. Günlük işlem sayısını <b>0</b> yaparsan bot yeni işlem açmaz.
+            Testnet’te güvenli şekilde ilerleyeceğiz.
+          </div>
+
+          <!-- B0 Runtime + Logs -->
+          <div style="margin-top:14px; border-top:1px solid rgba(255,255,255,.08); padding-top:14px;">
+            <div class="status-grid">
+              <div class="status-box">
+                <div class="status-label">Son Heartbeat</div>
+                <div id="rt_heartbeat" class="status-value">—</div>
+              </div>
+              <div class="status-box">
+                <div class="status-label">Son Fiyat</div>
+                <div id="rt_price" class="status-value">—</div>
+              </div>
+              <div class="status-box">
+                <div class="status-label">Pozisyon</div>
+                <div id="rt_position" class="status-value">—</div>
+              </div>
+              <div class="status-box">
+                <div class="status-label">Balance</div>
+                <div id="rt_balance" class="status-value">—</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="status-label">Son İşlem</div>
+              <div id="rt_last_trade" style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; opacity:.9; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px;">
+                —
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="status-label">Logs</div>
+              <div id="logBox" style="height:220px; overflow:auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; opacity:.9; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px;">
+                —
+              </div>
+            </div>
+          </div>
+          <!-- /B0 Runtime + Logs -->
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function toast(msg){
+    const el = document.getElementById("toast");
+    if(!el) return;
+    el.textContent = msg || "";
+  }
+
+  function updateLivePanel(s){
+    const botStatus = document.getElementById("live_bot_status");
+    const daily = document.getElementById("live_daily_limit");
+    const maxPos = document.getElementById("live_max_position");
+    const risk = document.getElementById("live_risk");
+
+    if(botStatus){
+      const on = !!s.bot_aktif;
+      botStatus.textContent = on ? "Açık" : "Kapalı";
+      botStatus.classList.toggle("on", on);
+      botStatus.classList.toggle("off", !on);
+    }
+    if(daily) daily.textContent = (s.gunluk_maks_islem ?? 0);
+    if(maxPos) maxPos.textContent = (s.maksimum_acik_pozisyon ?? 0);
+    if(risk) risk.textContent = (s.islem_basi_risk_usd ?? 0);
+  }
+
+  function updateToggle(isOn){
+    const t = document.getElementById("toggle");
+    if(!t) return;
+    t.classList.toggle("on", !!isOn);
+  }
+
+  function fillForm(s){
+    const el = (id) => document.getElementById(id);
+
+    if(el("gunluk_maks_islem")) el("gunluk_maks_islem").value = s.gunluk_maks_islem ?? 100;
+    if(el("maksimum_acik_pozisyon")) el("maksimum_acik_pozisyon").value = s.maksimum_acik_pozisyon ?? 10;
+    if(el("islem_basi_risk_usd")) el("islem_basi_risk_usd").value = s.islem_basi_risk_usd ?? 2;
+    if(el("kar_al_yuzde")) el("kar_al_yuzde").value = s.kar_al_yuzde ?? 3;
+    if(el("zarar_durdur_yuzde")) el("zarar_durdur_yuzde").value = s.zarar_durdur_yuzde ?? 1;
+
+    const markets = s.piyasalar || ["BTC","ETH"];
+    if(el("btc")) el("btc").checked = markets.includes("BTC");
+    if(el("eth")) el("eth").checked = markets.includes("ETH");
+
+    const chipBTC = el("chipBTC");
+    const chipETH = el("chipETH");
+    if(chipBTC && el("btc")) chipBTC.classList.toggle("active", el("btc").checked);
+    if(chipETH && el("eth")) chipETH.classList.toggle("active", el("eth").checked);
+
+    const selected = new Set(s.zaman_dilimleri_dakika || [5,10,15,30]);
+    const timeWrap = el("timeChips");
+    if(timeWrap){
+      timeWrap.style.visibility = "visible";
+      timeWrap.querySelectorAll(".chip").forEach(ch => {
+        const m = parseInt(ch.dataset.min, 10);
+        ch.classList.toggle("active", selected.has(m));
+      });
+    }
+  }
+
+  async function getSettings(){
+    const res = await fetch("/ayarlar");
+    if(!res.ok) throw new Error("ayarlar_getir_failed");
+    return await res.json();
+  }
+
+  async function refreshAll(){
+    const s = await getSettings();
+    fillForm(s);
+    updateToggle(!!s.bot_aktif);
+    updateLivePanel(s);
+  }
+
+  async function saveSettings(){
+    const el = (id) => document.getElementById(id);
+
+    const tfd = Array.from(document.querySelectorAll("#timeChips .chip.active"))
+      .map(ch => parseInt(ch.dataset.min, 10))
+      .filter(n => Number.isFinite(n) && n > 0);
+
+    const markets = [];
+    if(el("btc")?.checked) markets.push("BTC");
+    if(el("eth")?.checked) markets.push("ETH");
+
+    const payload = {
+      gunluk_maks_islem: parseInt(el("gunluk_maks_islem").value, 10),
+      maksimum_acik_pozisyon: parseInt(el("maksimum_acik_pozisyon").value, 10),
+      islem_basi_risk_usd: parseFloat(el("islem_basi_risk_usd").value),
+      kar_al_yuzde: parseFloat(el("kar_al_yuzde").value),
+      zarar_durdur_yuzde: parseFloat(el("zarar_durdur_yuzde").value),
+      zaman_dilimleri_dakika: tfd.length ? tfd : [5,10,15,30],
+      piyasalar: markets.length ? markets : ["BTC","ETH"],
+    };
+
+    toast("Kaydediliyor...");
+    try{
+      const res = await fetch("/ayarlar", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(payload)
+      });
+
+      if(!res.ok) throw new Error("ayarlar_kaydet_failed");
+
+      const lastSaved = document.getElementById("lastSaved");
+      if(lastSaved){
+        const now = new Date();
+        lastSaved.textContent =
+          now.toLocaleTimeString("tr-TR", {hour:"2-digit", minute:"2-digit", second:"2-digit"}) + " kaydedildi";
+      }
+
+      toast("✅ Kaydedildi");
+      setTimeout(()=>toast(""), 1200);
+
+      await refreshAll();
+    }catch(e){
+      toast("❌ Hata: Ayarlar kaydedilemedi.");
+    }
+  }
+
+  async function toggleBot(){
+    toast("İşleniyor...");
+    try{
+      const s = await getSettings();
+      const next = !s.bot_aktif;
+
+      updateToggle(next);
+      updateLivePanel({...s, bot_aktif: next});
+
+      const res = await fetch("/ayarlar", {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ bot_aktif: next })
+      });
+      if(!res.ok) throw new Error("bot_toggle_failed");
+
+      toast("");
+      await refreshAll();
+    }catch(e){
+      toast("❌ Bot durumu değiştirilemedi.");
+      try { await refreshAll(); } catch(_){}
+    }
+  }
+
+  // --- B0 Runtime + Logs ---
+  async function refreshRuntime(){
+    try{
+      const res = await fetch("/bot/summary");
+      if(!res.ok) return;
+      const d = await res.json();
+
+      const hb = document.getElementById("rt_heartbeat");
+      const pr = document.getElementById("rt_price");
+      const ps = document.getElementById("rt_position");
+      const bl = document.getElementById("rt_balance");
+      const lt = document.getElementById("rt_last_trade");
+
+      if(hb) hb.textContent = d.last_heartbeat_at ?? "—";
+      if(pr) pr.textContent = (d.last_price ?? "—");
+      if(ps) ps.textContent = (d.position === 1 ? "LONG (1)" : "YOK (0)");
+      if(bl) bl.textContent = (d.balance ?? "—");
+      if(lt) lt.textContent = d.last_trade ?? "—";
+    }catch(e){
+      // sessiz geç
+    }
+  }
+
+  async function refreshLogs(){
+    try{
+      const res = await fetch("/bot/logs");
+      if(!res.ok) return;
+      const d = await res.json();
+      const logs = d.logs || [];
+
+      const box = document.getElementById("logBox");
+      if(!box) return;
+
+      const last = logs.slice(-20);
+box.innerHTML = last.map(x => `<div>${x}</div>`).join("");
+
+      box.scrollTop = box.scrollHeight;
+    }catch(e){
+      // sessiz geç
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("btnRefresh")?.addEventListener("click", refreshAll);
+    document.getElementById("btnSave")?.addEventListener("click", saveSettings);
+    document.getElementById("toggle")?.addEventListener("click", toggleBot);
+
+    document.getElementById("chipBTC")?.addEventListener("click", () => {
+      const c = document.getElementById("btc");
+      if(!c) return;
+      c.checked = !c.checked;
+      document.getElementById("chipBTC")?.classList.toggle("active", c.checked);
+    });
+
+    document.getElementById("chipETH")?.addEventListener("click", () => {
+      const c = document.getElementById("eth");
+      if(!c) return;
+      c.checked = !c.checked;
+      document.getElementById("chipETH")?.classList.toggle("active", c.checked);
+    });
+
+    document.querySelectorAll("#timeChips .chip").forEach(ch => {
+      ch.addEventListener("click", () => ch.classList.toggle("active"));
+    });
+
+    // ilk yükleme
+    refreshAll().catch(()=>toast("❌ Ayarlar yüklenemedi."));
+    refreshRuntime();
+    refreshLogs();
+
+    // 2 saniyede bir runtime+log güncelle
+    setInterval(() => {
+      refreshRuntime();
+      refreshLogs();
+    }, 10000);
+  });
+</script>
+</body>
+</html>
